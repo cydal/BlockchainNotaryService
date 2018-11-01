@@ -113,13 +113,13 @@ function getByHash(hash) {
 
     return new Promise((resolve, reject) => {
         
-        db.createReadStream().on('data', function(data) {
+        db.createReadStream().on('data', (data) => {
             block = JSON.parse(data.value);
 
-            if (parseInt(data.key) > 0) { 
-                block.body.star.storyDecoded = new Buffer(block.body.star.story, 'hex').toString();
-            }
-            
+           if (parseInt(data.key) > 0) {
+            block.body.star.storyDecoded = new Buffer(block.body.star.story, 'hex').toString();
+           }
+
             if (block.hash === hash) {
                blocks.push(block);
             }

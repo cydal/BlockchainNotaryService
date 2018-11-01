@@ -138,49 +138,53 @@ app.post('/block', async (req, res) => {
     validateStarRequest(req, res);
 
     const starValidation = new Star();
-    
 
     try {
+
         const valid = await starValidation.isValid(req);
+
+        console.log("Checked Validity " + valid );
+
         if (!valid) {
             throw new Error("Signature is invalid");
         }
 
-    } catch(err) {
-            res.status(401).json({
-                "status": 400,
-                "message": "Block Error - " + err.message
-            });
 
-        return
-    }
-
-
-    try {
-        const body = req.body;
-        const { address, star } = req.body ;
     
-        body.star.story = new Buffer(star.story).toString('hex');
-    
-    
-        let height = await blockchain.getChainHeight();
-    
-    
-        await blockchain.addBlock(new Blck(body));
-    
-        height = await blockchain.getChainHeight();
-        const response = await blockchain.getBlock(height);
-    
-        starValidation.remove(address);
-    
-        res.send(response);
 
     } catch(err) {
-        res.status(404).json({
-            "status": 404,
-            "message": err.message + " Headers"
+        
+
+        res.status(401).json({
+            "status": 401,
+            "message": "Block Error - " + err.message
         });
+
+
+        console.log("Caught- " + err.message);
+        return;
     }
+
+
+    const body = req.body;
+    const { address, star } = req.body ;
+
+    body.star.story = new Buffer(star.story).toString('hex');
+
+
+    let height = await blockchain.getChainHeight();
+
+
+    await blockchain.addBlock(new Blck(body));
+
+    height = await blockchain.getChainHeight();
+    const response = await blockchain.getBlock(height);
+
+    starValidation.remove(address);
+
+    res.status(201).send(JSON.stringify(response));
+
+
 
     //console.log(JSON.stringify(response));
     //res.send(JSON.stringify(response));
@@ -210,7 +214,7 @@ app.post('/requestValidation', async (req, res) => {
 
 app.post('/message-signature/validate', async (req, res) => {
 
-    validateAddress(req), res;
+    validateAddress(req, res);
     validateSignature(req, res);
 
     const starValidation = new Star();

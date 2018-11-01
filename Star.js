@@ -1,3 +1,4 @@
+
 const level = require('level');
 const chainDB = './data/star';
 const db = level(chainDB);
@@ -10,7 +11,7 @@ const VALIDATION_WINDOW = 300;
  */
 class Star {
     constructor() {
-        //this.req = req;
+
     }
 
     /**
@@ -97,7 +98,9 @@ class Star {
                         let isValid = false;
                         try {
                             isValid = bitcoinMessage.verify(value.message, address, signature);
+                            console.log(isValid);
                         } catch (err) {
+                            console.log(err.message);
                             isValid = false;
                         }
 
@@ -124,19 +127,13 @@ class Star {
      *  Check address on system
      */
     async isValid(req) {
-        return new Promise((resolve, reject) => {
-            db.get(req.body.address, (err, value) => {
-                
-                if (value === undefined) {
-                    return reject(new Error("Address not authorized"));
-                } else if (err) {
-                    return reject(err);
-                }
 
-                value = JSON.parse(value);
-                return value.messageSignature === 'valid';
-            })
-        });
+        return db.get(req.body.address).then((value) => {
+            value = JSON.parse(value);
+            return value.messageSignature === 'valid';
+        }).catch(() => {
+            throw new Error('Address not recognized');
+        })
     }
 
     /**
